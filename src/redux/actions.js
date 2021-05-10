@@ -1,40 +1,22 @@
 import { call, put } from "redux-saga/effects";
 
-export default function* searchPokemon(input) {
-  try {
-    const url = `https://pokeapi.co/api/v2/pokemon/${input}/`;
-    const res = yield call(fetch, url);
-    const pokemon = yield call([res, "json"]);
-    yield put({ type: "POKEMON_SUCCESS", pokemon: pokemon });
-  } catch (error) {
-    yield put({ type: "POKEMON_ERROR", error: error });
-  }
+async function fetchAPI(searchTerm) {
+  const url = `https://pokeapi.co/api/v2/pokemon/${searchTerm}/`;
+  const res = await fetch(url);
+  const item = await res.json();
+  //console.log(item);
+  return item;
 }
 
-// const searchPokemon = (input) => {
-//   //console.log(input);
-//   return async (dispatch) => {
-//     dispatch({
-//       type: "POKEMON_LOADING",
-//     });
-
-//     try {
-//       const url = `https://pokeapi.co/api/v2/pokemon/${input}/`;
-//       const data = await fetch(url);
-//       const res = await data.json();
-//       dispatch({
-//         type: "POKEMON_SUCCESS",
-//         pokemon: res,
-//       });
-//       console.log(res);
-//     } catch (error) {
-//       alert(`Pokemon ${input} does not exist. Please try another name`);
-//       dispatch({
-//         type: "POKEMON_ERROR",
-//         error: error,
-//       });
-//     }
-//   };
-// };
-
-// export { searchPokemon };
+export default function* searchPokemon({ searchTerm }) {
+  //console.log("Starting Saga Handler");
+  //console.log("TERM: ", searchTerm);
+  try {
+    const res = yield call(fetchAPI, searchTerm);
+    //console.log("RESPONSE: ", res);
+    if (res.err) throw res.err;
+    yield put({ type: "POKEMON_SUCCESS", res });
+  } catch (error) {
+    yield put({ type: "POKEMON_ERROR", error });
+  }
+}

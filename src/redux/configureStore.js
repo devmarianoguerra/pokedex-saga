@@ -2,11 +2,12 @@ import { createStore, applyMiddleware } from "redux";
 import reducer from "./reducer";
 import createSagaMiddleware from "redux-saga";
 import fetchSaga from "../sagas/fetchSaga";
+import logger from "redux-logger";
 
-const sagaMiddleware = createSagaMiddleware();
+const sagaMiddleWare = createSagaMiddleware();
 
-const store = createStore(reducer, applyMiddleware(sagaMiddleware));
+const store = createStore(reducer, applyMiddleware(sagaMiddleWare, logger));
 
-sagaMiddleware.run(fetchSaga);
+sagaMiddleWare.run(fetchSaga);
 
 export default store;

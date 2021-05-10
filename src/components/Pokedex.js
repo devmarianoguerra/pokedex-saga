@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { InputGroup, FormControl, Button, Card } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import searchPokemon from "../redux/actions";
 
 const MainContainer = styled.div`
   display: flex;
@@ -52,21 +51,33 @@ function Pokedex() {
   const dispatch = useDispatch();
   const statePokemon = useSelector((state) => state.pokemon);
   const loading = useSelector((state) => state.loading);
+  const error = useSelector((state) => state.error);
 
   const handleChange = (e) => {
     setPokemon(e.target.value);
-    console.log(Pokemon);
+    //console.log(Pokemon);
   };
 
   const getPokemon = () => {
-    dispatch(searchPokemon(Pokemon));
+    dispatch({
+      type: "POKEMON_LOADING",
+      searchTerm: Pokemon,
+    });
+    setPokemon("");
   };
 
   const PokemonInfo = (pokemon) => {
-    console.log("pokemon detail: ", pokemon);
+    //console.log("pokemon detail: ", pokemon);
+    if (pokemon === null && error) {
+      return (
+        <div>That pokemon does not exists. Try again with another name</div>
+      );
+    }
+
     if (pokemon.sprites === undefined) {
       return <div>Nothing searched yet!</div>;
     }
+
     return (
       <Card style={{ width: "18rem" }}>
         <Card.Img
@@ -84,25 +95,29 @@ function Pokedex() {
                 width: "9rem",
               }}
             >
-              {pokemon.types.map((item) => (
-                <TypePill type={item.type.name}>{item.type.name}</TypePill>
+              {pokemon.types.map((item, i) => (
+                <TypePill key={i} type={item.type.name}>
+                  {item.type.name}
+                </TypePill>
               ))}
             </div>
           </Card.Title>
           <Card.Text>
             <div style={{ display: "flex", justifyContent: "space-evenly" }}>
               <label>Height:</label>
-              <h6>{pokemon.height}</h6>
+              <p>{pokemon.height}</p>
               <label>Weight:</label>
-              <h6>{pokemon.weight}</h6>
+              <p>{pokemon.weight}</p>
             </div>
 
             <label>Abilities: </label>
-            <ul>
-              {pokemon.abilities.map((item) => (
-                <li>{item.ability.name}</li>
-              ))}
-            </ul>
+            <div>
+              <ul>
+                {pokemon.abilities.map((item, i) => (
+                  <li key={i}>{item.ability.name}</li>
+                ))}
+              </ul>
+            </div>
           </Card.Text>
           {/* <Button variant="primary">Go somewhere</Button> */}
         </Card.Body>
@@ -114,11 +129,12 @@ function Pokedex() {
     <>
       <MainContainer>
         <h1>Pokedex</h1>
-        <div>
+        <div style={{ width: "12em" }}>
           <InputGroup className="mb-3" size="sm">
             <FormControl
               placeholder="Write the pokemon's name"
               onChange={handleChange}
+              value={Pokemon}
             />
           </InputGroup>
         </div>
